@@ -2,7 +2,7 @@
     "name": "backticks",
     "displayName": "Backticks",
     "description": "Automatically converts quotes to backticks when entering '${'.",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "publisher": "fractalbrew",
     "repository": {
         "type": "git",
@@ -25,15 +25,19 @@
     ],
     "main": "./extension",
     "contributes": {
-        "commands": [{
-            "command": "backticks.convertQuotes",
-            "title": "Convert quotes to backticks.",
-            "category": "Backticks"
-        }],
-        "keybindings": [{
-            "key": "shift+[",
-            "command": "backticks.convertQuotes"
-        }]
+        "commands": [
+            {
+                "command": "backticks.convertQuotes",
+                "title": "Convert quotes to backticks.",
+                "category": "Backticks"
+            }
+        ],
+        "keybindings": [
+            {
+                "key": "shift+[",
+                "command": "backticks.convertQuotes"
+            }
+        ]
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
