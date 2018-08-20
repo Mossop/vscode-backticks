@@ -1,0 +1,39 @@
+{
+    "name": "backticks",
+    "displayName": "Backticks",
+    "description": "Automatically converts quotes to backticks when entering '${'.",
+    "version": "0.0.1",
+    "publisher": "fractalbrew",
+    "engines": {
+        "vscode": "^1.26.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:backticks.convertQuotes"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "commands": [{
+            "command": "backticks.convertQuotes",
+            "title": "Convert quotes to backticks.",
+            "category": "Backticks"
+        }],
+        "keybindings": [{
+            "key": "shift+[",
+            "command": "backticks.convertQuotes"
+        }]
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21",
+        "eslint": "^4.11.0",
+        "@types/node": "^8.10.25",
+        "@types/mocha": "^2.2.42"
+    }
+}
