@@ -2,14 +2,24 @@
     "name": "backticks",
     "displayName": "Backticks",
     "description": "Automatically converts quotes to backticks when entering '${'.",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "publisher": "fractalbrew",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/FractalBrew/vscode-backticks.git"
+    },
+    "homepage": "https://github.com/FractalBrew/vscode-backticks/blob/master/README.md",
     "engines": {
         "vscode": "^1.26.0"
     },
     "categories": [
         "Other"
     ],
+    "keywords": [
+        "backtick",
+        "JavasScript"
+    ],
+    "icon": "icon.png",
     "activationEvents": [
         "onCommand:backticks.convertQuotes"
     ],
