@@ -2,8 +2,10 @@ const { Range, commands } = require('vscode');
 
 const QUOTES = ['"', '\'', '`'];
 
+const languageIdentifiers = new Set(['javascript', 'typescript', 'javascriptreact', 'typescriptreact']);
+
 function convertQuotes(editor, edit, selection) {
-    if (editor.document.languageId != 'javascript') {
+    if (!languageIdentifiers.has(editor.document.languageId)) {
         return;
     }
 
