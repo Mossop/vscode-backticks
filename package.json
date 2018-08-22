@@ -35,7 +35,8 @@
         "keybindings": [
             {
                 "key": "shift+[",
-                "command": "backticks.convertQuotes"
+                "command": "backticks.convertQuotes",
+                "when": "editorTextFocus"
             }
         ]
     },
