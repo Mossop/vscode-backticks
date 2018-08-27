@@ -17,42 +17,39 @@ const compare = (document, filename) => {
     expect(result).toBe(expected);
 };
 
+const manipulate = async (editor, selections) => {
+    for (let selection of selections) {
+        editor.selections = selection;
+        await commands.executeCommand('backticks.convertQuotes');
+    }
+};
+
+const simpleTest = async (source, result, selections) => {
+    let document = await workspace.openTextDocument(file(source));
+    let editor = await window.showTextDocument(document);
+    await manipulate(editor, selections);
+    compare(document, result);
+    await commands.executeCommand('workbench.action.closeActiveEditor');
+};
+
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 // const vscode = require('vscode');
 // const myExtension = require('../extension');
 suite("Expression Insertion Tests", function() {
     test("Insertion into simple strings", async function() {
-        let document = await workspace.openTextDocument(file('test.1.js'));
-        let editor = await window.showTextDocument(document);
-
-        editor.selections = [new Selection(1, 26, 1, 26)];
-        await commands.executeCommand('backticks.convertQuotes');
-
-        editor.selections = [new Selection(3, 22, 3, 22)];
-        await commands.executeCommand('backticks.convertQuotes');
-
-        editor.selections = [new Selection(5, 25, 5, 25)];
-        await commands.executeCommand('backticks.convertQuotes');
-
-        compare(document, 'result.1.js');
-        await commands.executeCommand('workbench.action.closeActiveEditor');
+        await simpleTest('test.1.js', 'result.1.js', [
+            [new Selection(1, 26, 1, 26)],
+            [new Selection(3, 22, 3, 22)],
+            [new Selection(5, 25, 5, 25)],
+        ]);
     });
 
     test("Ignore non-JS document", async function() {
-        let document = await workspace.openTextDocument(file('test.2.txt'));
-        let editor = await window.showTextDocument(document);
-
-        editor.selections = [new Selection(1, 26, 1, 26)];
-        await commands.executeCommand('backticks.convertQuotes');
-
-        editor.selections = [new Selection(3, 22, 3, 22)];
-        await commands.executeCommand('backticks.convertQuotes');
-
-        editor.selections = [new Selection(5, 25, 5, 25)];
-        await commands.executeCommand('backticks.convertQuotes');
-
-        compare(document, 'result.2.txt');
-        await commands.executeCommand('workbench.action.closeActiveEditor');
+        await simpleTest('test.2.txt', 'result.2.txt', [
+            [new Selection(1, 26, 1, 26)],
+            [new Selection(3, 22, 3, 22)],
+            [new Selection(5, 25, 5, 25)],
+        ]);
     });
 });
