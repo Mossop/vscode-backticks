@@ -36,5 +36,23 @@ suite("Expression Insertion Tests", function() {
         await commands.executeCommand('backticks.convertQuotes');
 
         compare(document, 'result.1.js');
+        await commands.executeCommand('workbench.action.closeActiveEditor');
+    });
+
+    test("Ignore non-JS document", async function() {
+        let document = await workspace.openTextDocument(file('test.2.txt'));
+        let editor = await window.showTextDocument(document);
+
+        editor.selections = [new Selection(1, 26, 1, 26)];
+        await commands.executeCommand('backticks.convertQuotes');
+
+        editor.selections = [new Selection(3, 22, 3, 22)];
+        await commands.executeCommand('backticks.convertQuotes');
+
+        editor.selections = [new Selection(5, 25, 5, 25)];
+        await commands.executeCommand('backticks.convertQuotes');
+
+        compare(document, 'result.2.txt');
+        await commands.executeCommand('workbench.action.closeActiveEditor');
     });
 });
