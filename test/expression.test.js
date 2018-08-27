@@ -45,6 +45,22 @@ suite("Expression Insertion Tests", function() {
         ]);
     });
 
+    test("Insertion with multiple selections", async function() {
+        await simpleTest('test.1.js', 'result.1.js', [
+            [new Selection(1, 26, 1, 26),
+             new Selection(3, 22, 3, 22),
+             new Selection(5, 25, 5, 25)],
+        ]);
+    });
+
+    test("Selections should be deleted", async function() {
+        await simpleTest('test.1.js', 'result.3.js', [
+            [new Selection(1, 26, 1, 27),
+             new Selection(3, 22, 3, 23),
+             new Selection(5, 25, 5, 26)],
+        ]);
+    });
+
     test("Ignore non-JS document", async function() {
         await simpleTest('test.2.txt', 'result.2.txt', [
             [new Selection(1, 26, 1, 26)],
