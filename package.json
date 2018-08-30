@@ -36,7 +36,7 @@
             {
                 "key": "shift+[",
                 "command": "backticks.convertQuotes",
-                "when": "editorTextFocus"
+                "when": "editorTextFocus && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
             }
         ]
     },
