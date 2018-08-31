@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.2.1
+- Fix a conflict with the Vim extension.
+
 ## 1.2.0
 - Fix use of the { key in other contexts.
 - Support typescript, jsx and tsx files.
