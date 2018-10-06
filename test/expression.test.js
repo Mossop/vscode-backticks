@@ -68,4 +68,35 @@ suite("Expression Insertion Tests", function() {
             [new Selection(5, 25, 5, 25)],
         ]);
     });
+
+    test("Multiline strings", async function() {
+        await simpleTest('test.4.js', 'result.4.js', [
+            [new Selection(1, 40, 1, 40)],
+        ]);
+    });
+
+    test("Escaped quotes", async function() {
+        await simpleTest('test.5.js', 'result.5.js', [
+            [new Selection(0, 17, 0, 17)],
+        ]);
+    });
+
+    test("Broken quotes", async function() {
+        await simpleTest('test.6.js', 'result.6.js', [
+            [new Selection(4, 36, 4, 36)],
+            [new Selection(6, 9, 6, 9)],
+        ]);
+    });
+
+    test("Unended quotes", async function() {
+        await simpleTest('test.7.js', 'result.7.js', [
+            [new Selection(0, 17, 0, 17)],
+        ]);
+    });
+
+    test("Selection over quote", async function() {
+        await simpleTest('test.8.js', 'result.8.js', [
+            [new Selection(0, 37, 0, 44)],
+        ]);
+    });
 });

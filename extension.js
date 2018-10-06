@@ -1,6 +1,5 @@
 const { Range, commands } = require('vscode');
-
-const QUOTES = ['"', '\'', '`'];
+const { findPreviousQuote, findEndQuote } = require('./quotefinder');
 
 const languageIdentifiers = new Set(['javascript', 'typescript', 'javascriptreact', 'typescriptreact']);
 
@@ -9,38 +8,21 @@ function convertQuotes(editor, edit, selection) {
         return;
     }
 
-    let line = editor.document.lineAt(selection.start);
-    let start = line.firstNonWhitespaceCharacterIndex;
-    let pos = selection.start.character - 1;
-    if (pos < start || line.text.charAt(pos) != '$') {
+    let document = editor.document;
+    let { character, position } = findPreviousQuote(document, selection.start);
+
+    // If we're already in a template string then there is nothing to do.
+    if (character == '`') {
         return;
     }
 
-    // Track back to find a quote character
-    let quoteChar = null;
-    pos--;
-    while (pos >= start) {
-        let char = line.text.charAt(pos);
-        if (QUOTES.indexOf(char) >= 0) {
-            // Already in a backtick quote so bail out
-            if (char == '`') {
-                return;
-            }
-            quoteChar = char;
-            edit.replace(new Range(line.lineNumber, pos, line.lineNumber, pos + 1), '`');
-            break;
-        }
-        pos--;
-    }
+    if (position) {
+        edit.replace(new Range(position, position.translate(0, 1)), '`');
 
-    if (quoteChar) {
-        pos = selection.end.character;
-        line = editor.document.lineAt(selection.end);
-        while (pos < line.text.length) {
-            if (line.text.charAt(pos) == quoteChar) {
-                edit.replace(new Range(line.lineNumber, pos, line.lineNumber, pos + 1), '`');
-            }
-            pos++;
+        // We're going to wipe out the selection so scan from the end of it.
+        let endQuote = findEndQuote(document, selection.end, character);
+        if (endQuote) {
+            edit.replace(new Range(endQuote, endQuote.translate(0, 1)), '`');
         }
     }
 }
