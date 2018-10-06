@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.3.0
+- Scans the entire script to support detecting multi-line strings and escaped quote characters.
+
 ## 1.2.1
 - Fix a conflict with the Vim extension.
 
