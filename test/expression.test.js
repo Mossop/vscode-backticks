@@ -106,4 +106,25 @@ suite("Expression Insertion Tests", function() {
             [new Selection(1, 22, 1, 22)],
         ])
     });
+
+    test("Ignore comments", async function() {
+        await simpleTest('test.10.js', 'result.10.js', [
+            [new Selection(0, 39, 0, 39)],
+            [new Selection(1, 39, 1, 39)],
+            [new Selection(3, 15, 3, 15)],
+            [new Selection(5, 13, 5, 13)],
+        ])
+    });
+
+    test("Replace at end of line", async function() {
+        await simpleTest('test.11.js', 'result.11.js', [
+            [new Selection(0, 32, 0, 32)],
+        ])
+    });
+
+    test("Replace at end of file", async function() {
+        await simpleTest('test.12.js', 'result.12.js', [
+            [new Selection(0, 32, 0, 32)],
+        ])
+    });
 });

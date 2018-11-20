@@ -1,16 +1,20 @@
 const { Position } = require('vscode');
 
-const STATE_NO_QUOTE = 0;
+const STATE_NORMAL = 0;
 const STATE_TEMPLATE_QUOTE = 1;
 const STATE_DOUBLE_QUOTE = 2;
 const STATE_SINGLE_QUOTE = 3;
 const STATE_ESCAPE = 4;
+const STATE_COMMENT_START = 5;
+const STATE_COMMENT_SINGLELINE = 6;
+const STATE_COMMENT_MULTILINE = 7;
+const STATE_COMMENT_MULTILINE_END = 8;
 
 const QUOTES = ['`', '"', '\''];
 
 class QuoteState {
   constructor(quoteChar = null) {
-    this.states = [STATE_NO_QUOTE];
+    this.states = [STATE_NORMAL];
     if (quoteChar) {
       this.pushState(QUOTES.indexOf(quoteChar) + 1);
     }
@@ -31,9 +35,50 @@ class QuoteState {
   }
 
   pushChar(position, char) {
-    // Throw away escaped characters.
-    if (this.state == STATE_ESCAPE) {
-      this.popState();
+    switch (this.state) {
+      case STATE_COMMENT_START:
+        // Regardless we're no longer in the start state.
+        this.popState();
+
+        if (char == '/') {
+          this.pushState(STATE_COMMENT_SINGLELINE);
+          return;
+        } else if (char == '*') {
+          this.pushState(STATE_COMMENT_MULTILINE);
+          return;
+        }
+
+        // If we haven't entered a comment then just continue to process this
+        // character.
+        break;
+
+      // Nothing can change this state.
+      case STATE_COMMENT_SINGLELINE:
+        return;
+
+      // The only way to change this state is by ending the comment.
+      case STATE_COMMENT_MULTILINE:
+        if (char == '*') {
+          this.pushState(STATE_COMMENT_MULTILINE_END);
+        }
+        return;
+
+      // We always at least drop back to the comment state, maybe leave that entirely.
+      case STATE_COMMENT_MULTILINE_END:
+        this.popState();
+        if (char == '/') {
+          this.popState();
+        }
+        return;
+
+      // Throw away escaped characters.
+      case STATE_ESCAPE:
+        this.popState();
+        return;
+    }
+
+    if (this.state == STATE_NORMAL && char == '/') {
+      this.pushState(STATE_COMMENT_START);
       return;
     }
 
@@ -43,11 +88,11 @@ class QuoteState {
       return;
     }
 
-    // We only need do something if this is a quote character.
+    // We now only need do something if this is a quote character.
     let type = QUOTES.indexOf(char) + 1;
-    if (type > STATE_NO_QUOTE) {
+    if (type > STATE_NORMAL) {
       // Check if we're entering a quote.
-      if (this.state == STATE_NO_QUOTE) {
+      if (this.state == STATE_NORMAL) {
         this.pushState(type);
         this.lastQuotePosition = position;
         this.lastQuoteChar = char;
@@ -66,13 +111,23 @@ class QuoteState {
   }
 
   pushEOL() {
-    // Both these states survive an EOL.
-    if (this.state <= STATE_TEMPLATE_QUOTE) {
-      return;
-    }
+    switch (this.state) {
+      // These states survive an EOL.
+      case STATE_NORMAL:
+      case STATE_TEMPLATE_QUOTE:
+      case STATE_COMMENT_MULTILINE:
+        return;
 
-    // Anything else pops us up one state.
-    this.popState();
+      // These pop us up one state.
+      case STATE_DOUBLE_QUOTE:
+      case STATE_SINGLE_QUOTE:
+      case STATE_ESCAPE:
+      case STATE_COMMENT_START:
+      case STATE_COMMENT_SINGLELINE:
+      case STATE_COMMENT_MULTILINE_END:
+        this.popState();
+        return;
+    }
   }
 }
 
@@ -80,7 +135,11 @@ exports.findPreviousQuote = function(document, position) {
   let state = new QuoteState();
 
   let line = 0;
-  while (line < document.lineCount) {
+  while (line <= position.line) {
+    if (line > 0) {
+      state.pushEOL();
+    }
+
     let text = document.lineAt(line).text;
     let char = 0;
     while (char < text.length) {
@@ -97,16 +156,13 @@ exports.findPreviousQuote = function(document, position) {
       char++;
     }
 
-    state.pushEOL();
-
     line++;
   }
 
-  // It should be impossible to get here.
-  console.error('findPreviousQuote never found expected position.');
+  // We get here when the insertion position is at the end of the line.
   return {
-    character: null,
-    position: null,
+    character: state.lastQuoteChar,
+    position: state.lastQuotePosition,
   };
 }
 
@@ -123,7 +179,7 @@ exports.findEndQuote = function(document, position, lastQuoteChar) {
       state.pushChar(pos, text.charAt(char));
 
       // If this character was the end of the quote then return its position.
-      if (state.state == STATE_NO_QUOTE) {
+      if (state.state == STATE_NORMAL) {
         return pos;
       }
 
@@ -133,7 +189,7 @@ exports.findEndQuote = function(document, position, lastQuoteChar) {
     state.pushEOL();
 
     // If the EOL killed the quote then there is no quote character to replace.
-    if (state.state == STATE_NO_QUOTE) {
+    if (state.state == STATE_NORMAL) {
       return null;
     }
 
