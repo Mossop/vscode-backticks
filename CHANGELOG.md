@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.0
+- Skips over quotes embedded inside comments.
+- Fixes cases where the brace was inserted at the end of a line or file.
+
 ## 1.3.0
 - Scans the entire script to support detecting multi-line strings and escaped quote characters.
 
