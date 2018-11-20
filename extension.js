@@ -27,14 +27,27 @@ function convertQuotes(editor, edit, selection) {
     }
 }
 
+function followsDollar(editor, selection) {
+    let position = selection.start;
+    if (position.character == 0) {
+        return false;
+    }
+
+    let range = new Range(position.line, position.character - 1, position.line, position.character);
+    let character = editor.document.getText(range);
+    return character == "$";
+}
+
 function bracePressed(editor, edit) {
     for (let selection of editor.selections) {
-        try {
-            // Do this first as it won't alter the positions of characters which
-            // confuses matters.
-            convertQuotes(editor, edit, selection);
-        } catch (e) {
-            console.error(e);
+        if (followsDollar(editor, selection)) {
+            try {
+                // Do this first as it won't alter the positions of characters which
+                // confuses matters.
+                convertQuotes(editor, edit, selection);
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         // We must insert the { key manually regardless.

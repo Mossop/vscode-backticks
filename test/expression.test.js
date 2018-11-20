@@ -99,4 +99,11 @@ suite("Expression Insertion Tests", function() {
             [new Selection(0, 37, 0, 44)],
         ]);
     });
+
+    test("Insert without dollar", async function() {
+        await simpleTest('test.9.js', 'result.9.js', [
+            [new Selection(0, 3, 0, 3)],
+            [new Selection(1, 22, 1, 22)],
+        ])
+    });
 });
