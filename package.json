@@ -10,7 +10,7 @@
     },
     "homepage": "https://github.com/FractalBrew/vscode-backticks/blob/master/README.md",
     "engines": {
-        "vscode": "^1.29.0"
+        "vscode": "^1.35.0"
     },
     "categories": [
         "Other"

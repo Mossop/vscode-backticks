@@ -3,12 +3,14 @@
 // The module 'assert' provides assertion methods from node
 const expect = require('expect');
 const fs = require('fs');
-const { window, workspace, commands, Selection } = require('vscode');
+const { window, workspace, commands, Selection, ConfigurationTarget, Uri } = require('vscode');
 const path = require('path');
 
 const file = (name) => {
     return path.join(__dirname, 'files', name);
 };
+
+const uri = (name) => Uri.file(file(name));
 
 const compare = (document, filename) => {
     let result = document.getText();
@@ -24,12 +26,29 @@ const manipulate = async (editor, selections) => {
     }
 };
 
-const simpleTest = async (source, result, selections) => {
-    let document = await workspace.openTextDocument(file(source));
+const simpleTest = async (source, result, selections, config) => {
+    let document = await workspace.openTextDocument(uri(source));
     let editor = await window.showTextDocument(document);
+
+    if (config) {
+        let cnf = workspace.getConfiguration('', document.uri);
+
+        for (let name of Object.keys(config)) {
+            await cnf.update(name, config[name], ConfigurationTarget.WorkspaceFolder)
+        }
+    }
+
     await manipulate(editor, selections);
     compare(document, result);
     await commands.executeCommand('workbench.action.closeActiveEditor');
+
+    if (config) {
+        let cnf = workspace.getConfiguration('', document.uri);
+
+        for (let name of Object.keys(config)) {
+            await cnf.update(name, undefined, ConfigurationTarget.WorkspaceFolder)
+        }
+    }
 };
 
 // You can import and use all API from the 'vscode' module
@@ -58,7 +77,9 @@ suite("Expression Insertion Tests", function() {
             [new Selection(1, 26, 1, 27),
              new Selection(3, 22, 3, 23),
              new Selection(5, 25, 5, 26)],
-        ]);
+        ], {
+            "editor.autoSurround": "never",
+        });
     });
 
     test("Ignore non-JS document", async function() {
@@ -97,7 +118,9 @@ suite("Expression Insertion Tests", function() {
     test("Selection over quote", async function() {
         await simpleTest('test.8.js', 'result.8.js', [
             [new Selection(0, 37, 0, 44)],
-        ]);
+        ], {
+            "editor.autoSurround": "never",
+        });
     });
 
     test("Insert without dollar", async function() {
@@ -126,5 +149,23 @@ suite("Expression Insertion Tests", function() {
         await simpleTest('test.12.js', 'result.12.js', [
             [new Selection(0, 32, 0, 32)],
         ])
+    });
+
+    test("Selections should be surrounded", async function() {
+        await simpleTest('test.1.js', 'result.13.js', [
+            [new Selection(1, 26, 1, 27),
+             new Selection(3, 22, 3, 23),
+             new Selection(5, 25, 5, 26)],
+        ], {
+            "editor.autoSurround": "languageDefined",
+        });
+    });
+
+    test("Surround selection over quote", async function() {
+        await simpleTest('test.8.js', 'result.14.js', [
+            [new Selection(0, 37, 0, 44)],
+        ], {
+            "editor.autoSurround": "languageDefined",
+        });
     });
 });

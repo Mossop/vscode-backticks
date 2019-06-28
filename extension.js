@@ -1,4 +1,4 @@
-const { Range, commands } = require('vscode');
+const { Range, commands, workspace } = require('vscode');
 const { findPreviousQuote, findEndQuote } = require('./quotefinder');
 
 const languageIdentifiers = new Set(['javascript', 'typescript', 'javascriptreact', 'typescriptreact']);
@@ -39,6 +39,7 @@ function followsDollar(editor, selection) {
 }
 
 function bracePressed(editor, edit) {
+    let surround = undefined;
     for (let selection of editor.selections) {
         if (followsDollar(editor, selection)) {
             try {
@@ -51,10 +52,16 @@ function bracePressed(editor, edit) {
         }
 
         // We must insert the { key manually regardless.
-        if (!selection.isEmpty) {
-            edit.delete(selection);
+        if (surround === undefined) {
+            surround = workspace.getConfiguration("editor", editor.document.uri).get("autoSurround") === "languageDefined";
         }
-        edit.insert(selection.start, '{');
+
+        if (surround && !selection.isEmpty) {
+            let range = new Range(selection.start, selection.end);
+            edit.replace(selection, `{${editor.document.getText(range)}}`)
+        } else {
+            edit.replace(selection, '{');
+        }
     }
 }
 
