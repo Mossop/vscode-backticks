@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.4.1
+- Surround selections with braces when configured to do so.
+
 ## 1.4.0
 - Skips over quotes embedded inside comments.
 - Fixes cases where the brace was inserted at the end of a line or file.
