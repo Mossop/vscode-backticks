@@ -2,7 +2,7 @@
     "name": "backticks",
     "displayName": "Backticks",
     "description": "Automatically converts quotes to backticks when entering '${'.",
-    "version": "1.4.1",
+    "version": "1.5.0",
     "publisher": "fractalbrew",
     "repository": {
         "type": "git",
@@ -25,40 +25,47 @@
     ],
     "main": "./extension",
     "contributes": {
-        "commands": [{
-            "command": "backticks.convertQuotes",
-            "title": "Convert quotes to backticks.",
-            "category": "Backticks"
-        }],
-        "keybindings": [{
-            "key": "shift+[",
-            "command": "backticks.convertQuotes",
-            "args": {
-                "fromKeyboard": true
+        "commands": [
+            {
+                "command": "backticks.convertQuotes",
+                "title": "Convert quotes to backticks.",
+                "category": "Backticks"
+            }
+        ],
+        "keybindings": [
+            {
+                "key": "shift+[",
+                "command": "backticks.convertQuotes",
+                "args": {
+                    "fromKeyboard": true
+                },
+                "when": "editorTextFocus && editorLangId == javascript && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
             },
-            "when": "editorTextFocus && editorLangId == javascript && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
-        }, {
-            "key": "shift+[",
-            "command": "backticks.convertQuotes",
-            "args": {
-                "fromKeyboard": true
+            {
+                "key": "shift+[",
+                "command": "backticks.convertQuotes",
+                "args": {
+                    "fromKeyboard": true
+                },
+                "when": "editorTextFocus && editorLangId == javascriptreact && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
             },
-            "when": "editorTextFocus && editorLangId == javascriptreact && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
-        }, {
-            "key": "shift+[",
-            "command": "backticks.convertQuotes",
-            "args": {
-                "fromKeyboard": true
+            {
+                "key": "shift+[",
+                "command": "backticks.convertQuotes",
+                "args": {
+                    "fromKeyboard": true
+                },
+                "when": "editorTextFocus && editorLangId == typescript && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
             },
-            "when": "editorTextFocus && editorLangId == typescript && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
-        }, {
-            "key": "shift+[",
-            "command": "backticks.convertQuotes",
-            "args": {
-                "fromKeyboard": true
-            },
-            "when": "editorTextFocus && editorLangId == typescriptreact && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
-        }]
+            {
+                "key": "shift+[",
+                "command": "backticks.convertQuotes",
+                "args": {
+                    "fromKeyboard": true
+                },
+                "when": "editorTextFocus && editorLangId == typescriptreact && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
+            }
+        ]
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
