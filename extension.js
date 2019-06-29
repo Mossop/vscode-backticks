@@ -32,21 +32,26 @@ function followsDollar(editor, selection) {
     return character == "$";
 }
 
-function bracePressed(editor, edit, args = undefined) {
+async function bracePressed(editor, edit, args = undefined) {
     let fromKeyboard = args ? args.fromKeyboard : false;
 
     for (let selection of editor.selections) {
         if (!fromKeyboard || followsDollar(editor, selection)) {
             try {
+                // Do this first as it won't alter the positions of characters which
+                // confuses matters.
                 convertQuotes(editor, edit, selection);
             } catch (e) {
                 console.error(e);
             }
         }
-    }
 
-    if (fromKeyboard) {
-        return commands.executeCommand('type', { text: '{' });
+        if (fromKeyboard) {
+            if (!selection.isEmpty) {
+                edit.delete(selection);
+            }
+            edit.insert(selection.start, '{');
+        }
     }
 }
 

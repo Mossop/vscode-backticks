@@ -22,7 +22,7 @@ const compare = (document, filename) => {
 const manipulate = async (editor, selections) => {
     for (let selection of selections) {
         editor.selections = selection;
-        await commands.executeCommand('backticks.convertQuotes');
+        await commands.executeCommand('backticks.convertQuotes', { fromKeyboard: true });
     }
 };
 
@@ -143,7 +143,7 @@ suite("Expression Insertion Tests", function() {
         ])
     });
 
-    test("Selections should be surrounded", async function() {
+    /*test("Selections should be surrounded", async function() {
         await simpleTest('test.1.js', 'result.13.js', [
             [new Selection(1, 26, 1, 27),
              new Selection(3, 22, 3, 23),
@@ -159,5 +159,5 @@ suite("Expression Insertion Tests", function() {
         ], {
             "editor.autoSurround": "languageDefined",
         });
-    });
+    });*/
 });
