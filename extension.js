@@ -1,13 +1,7 @@
 const { Range, commands, workspace } = require('vscode');
 const { findPreviousQuote, findEndQuote } = require('./quotefinder');
 
-const languageIdentifiers = new Set(['javascript', 'typescript', 'javascriptreact', 'typescriptreact']);
-
 function convertQuotes(editor, edit, selection) {
-    if (!languageIdentifiers.has(editor.document.languageId)) {
-        return;
-    }
-
     let document = editor.document;
     let { character, position } = findPreviousQuote(document, selection.start);
 

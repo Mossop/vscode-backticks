@@ -82,14 +82,6 @@ suite("Expression Insertion Tests", function() {
         });
     });
 
-    test("Ignore non-JS document", async function() {
-        await simpleTest('test.2.txt', 'result.2.txt', [
-            [new Selection(1, 26, 1, 26)],
-            [new Selection(3, 22, 3, 22)],
-            [new Selection(5, 25, 5, 25)],
-        ]);
-    });
-
     test("Multiline strings", async function() {
         await simpleTest('test.4.js', 'result.4.js', [
             [new Selection(1, 40, 1, 40)],
