@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.5.1
+- Revert to manually simulate keypresses and don't support auto-surrounding for now.
+
 ## 1.5.0
 - Only apply keybindings on js-like files.
 - Use built-in commands for typing the actual { rather than faking it.
