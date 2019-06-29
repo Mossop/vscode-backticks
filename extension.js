@@ -32,9 +32,11 @@ function followsDollar(editor, selection) {
     return character == "$";
 }
 
-function bracePressed(editor, edit) {
+function bracePressed(editor, edit, args = undefined) {
+    let fromKeyboard = args ? args.fromKeyboard : false;
+
     for (let selection of editor.selections) {
-        if (followsDollar(editor, selection)) {
+        if (!fromKeyboard || followsDollar(editor, selection)) {
             try {
                 convertQuotes(editor, edit, selection);
             } catch (e) {
@@ -43,7 +45,9 @@ function bracePressed(editor, edit) {
         }
     }
 
-    return commands.executeCommand('type', { text: '{' });
+    if (fromKeyboard) {
+        return commands.executeCommand('type', { text: '{' });
+    }
 }
 
 // this method is called when your extension is activated

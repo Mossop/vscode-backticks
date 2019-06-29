@@ -33,18 +33,30 @@
         "keybindings": [{
             "key": "shift+[",
             "command": "backticks.convertQuotes",
+            "args": {
+                "fromKeyboard": true
+            },
             "when": "editorTextFocus && editorLangId == javascript && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
         }, {
             "key": "shift+[",
             "command": "backticks.convertQuotes",
+            "args": {
+                "fromKeyboard": true
+            },
             "when": "editorTextFocus && editorLangId == javascriptreact && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
         }, {
             "key": "shift+[",
             "command": "backticks.convertQuotes",
+            "args": {
+                "fromKeyboard": true
+            },
             "when": "editorTextFocus && editorLangId == typescript && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
         }, {
             "key": "shift+[",
             "command": "backticks.convertQuotes",
+            "args": {
+                "fromKeyboard": true
+            },
             "when": "editorTextFocus && editorLangId == typescriptreact && vim.mode != 'Normal' && vim.mode != 'Visual' && vim.mode != 'VisualBlock' && vim.mode != 'VisualLine' && vim.mode != 'SearchInProgressMode' && vim.mode != 'CommandlineInProgress' && vim.mode != 'EasyMotionMode' && vim.mode != 'EasyMotionInputMode' && vim.mode != 'SurroundInputMode'"
         }]
     },
