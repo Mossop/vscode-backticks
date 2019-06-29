@@ -1,4 +1,4 @@
-const { Range, commands, workspace } = require('vscode');
+const { Range, commands } = require('vscode');
 const { findPreviousQuote, findEndQuote } = require('./quotefinder');
 
 function convertQuotes(editor, edit, selection) {
@@ -33,30 +33,17 @@ function followsDollar(editor, selection) {
 }
 
 function bracePressed(editor, edit) {
-    let surround = undefined;
     for (let selection of editor.selections) {
         if (followsDollar(editor, selection)) {
             try {
-                // Do this first as it won't alter the positions of characters which
-                // confuses matters.
                 convertQuotes(editor, edit, selection);
             } catch (e) {
                 console.error(e);
             }
         }
-
-        // We must insert the { key manually regardless.
-        if (surround === undefined) {
-            surround = workspace.getConfiguration("editor", editor.document.uri).get("autoSurround") === "languageDefined";
-        }
-
-        if (surround && !selection.isEmpty) {
-            let range = new Range(selection.start, selection.end);
-            edit.replace(selection, `{${editor.document.getText(range)}}`)
-        } else {
-            edit.replace(selection, '{');
-        }
     }
+
+    return commands.executeCommand('type', { text: '{' });
 }
 
 // this method is called when your extension is activated
