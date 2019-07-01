@@ -143,6 +143,16 @@ suite("Expression Insertion Tests", function() {
         ])
     });
 
+    test("Replace multiple in the same line", async function() {
+        await simpleTest('test.13.js', 'result.15.js', [
+            [new Selection(0, 10, 0, 10),
+             new Selection(0, 19, 0, 19),
+             new Selection(0, 28, 0, 28),
+             new Selection(1, 14, 1, 14),
+             new Selection(1, 26, 1, 26)],
+        ])
+    });
+
     /*test("Selections should be surrounded", async function() {
         await simpleTest('test.1.js', 'result.13.js', [
             [new Selection(1, 26, 1, 27),
