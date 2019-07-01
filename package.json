@@ -2,7 +2,7 @@
     "name": "backticks",
     "displayName": "Backticks",
     "description": "Automatically converts quotes to backticks when entering '${'.",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "publisher": "fractalbrew",
     "repository": {
         "type": "git",

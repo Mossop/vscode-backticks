@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.6.0
+- Use the internal type command again. Brace output is defined by Visual Studio Code.
+
 ## 1.5.1
 - Revert to manually simulate keypresses and don't support auto-surrounding for now.
 
