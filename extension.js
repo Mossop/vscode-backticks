@@ -36,7 +36,7 @@ async function bracePressed(editor, edit, args = undefined) {
     let fromKeyboard = args ? args.fromKeyboard : false;
 
     for (let selection of editor.selections) {
-        if (!fromKeyboard || followsDollar(editor, selection)) {
+        if (!fromKeyboard || (selection.isEmpty && followsDollar(editor, selection))) {
             try {
                 // Do this first as it won't alter the positions of characters which
                 // confuses matters.
@@ -45,13 +45,17 @@ async function bracePressed(editor, edit, args = undefined) {
                 console.error(e);
             }
         }
+    }
 
-        if (fromKeyboard) {
-            if (!selection.isEmpty) {
-                edit.delete(selection);
-            }
-            edit.insert(selection.start, '{');
-        }
+    if (fromKeyboard) {
+        await commands.executeCommand('type', { text: '{' });
+    }
+
+    try {
+        // Used to signal to the test harness that the command has completed.
+        await commands.executeCommand('backticks.test.complete');
+    } catch (e) {
+        console.error(e);
     }
 }
 

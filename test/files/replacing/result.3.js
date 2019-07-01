@@ -1,7 +1,7 @@
 let tring = null;
-let foo = `Double quoted ${ring}`
+let foo = "Double quoted ${ring}"
 
-foo = `Single quoted ${ring}`
+foo = 'Single quoted ${ring}'
 
 foo = `Template literal ${ring}`
 

@@ -1,6 +1,6 @@
-// Should ignore quotes in comments " ${ )
+// Should ignore quotes in comments " ${} )
 // Should ignore quotes in comments ' ${
 /* Also in multiline
-comments ' */ ${ )
+comments ' */ ${} )
 /* Also in multiline "\
 comments */ ${
