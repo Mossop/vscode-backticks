@@ -33,4 +33,4 @@ jobs:
         run: yarn lint
 
       - name: Test
-        run: yarn test
+        run: xvfb-run -a yarn test
