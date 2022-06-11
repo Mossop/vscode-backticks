@@ -4,4 +4,4 @@
 that is just fine
 "and" shouldn't \'get\' converted. ${} so 'there!'`
 `A multiline string \
-that is ${just fine!`
+that is ${}just fine!`

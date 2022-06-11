@@ -9,7 +9,6 @@ import {
   workspace,
   commands,
   Selection,
-  ConfigurationTarget,
   Uri,
   TextDocument,
   Disposable,
@@ -82,6 +81,13 @@ function closeEditor(): Promise<void> {
   });
 }
 
+function compareSelection(expected: Selection, received: Selection) {
+  expect(received.active.line).toBe(expected.active.line);
+  expect(received.active.character).toBe(expected.active.character);
+  expect(received.anchor.line).toBe(expected.anchor.line);
+  expect(received.anchor.character).toBe(expected.anchor.character);
+}
+
 async function manipulate(
   editor: TextEditor,
   selections: Selection[][],
@@ -106,19 +112,8 @@ async function manipulate(
     finalSelections.sort(selectionSort);
 
     expect(finalSelections.length).toBe(expected.length);
-    for (
-      let j = 0;
-      j < Math.min(finalSelections.length, expected.length);
-      j++
-    ) {
-      expect(finalSelections[j]!.start.line).toBe(expected[j]!.start.line);
-      expect(finalSelections[j]!.start.character).toBe(
-        expected[j]!.start.character,
-      );
-      expect(finalSelections[j]!.end.line).toBe(expected[j]!.end.line);
-      expect(finalSelections[j]!.end.character).toBe(
-        expected[j]!.end.character,
-      );
+    for (let j = 0; j < finalSelections.length; j++) {
+      compareSelection(finalSelections[j]!, expected[j]!);
     }
   }
 }
@@ -140,50 +135,37 @@ async function runTest(
   }
 }
 
-async function simpleTest(
+async function replacementTest(
   source: string,
-  replacingResult: string,
-  surroundingResult: string,
+  expectedResult: string,
   selections: Selection[][],
-  expectedReplaceSelections: Selection[][],
-  expectedSurroundSelections: Selection[][],
-  config: any = undefined,
+  expectedSelections: Selection[][],
 ) {
   let docUri = uri(source);
   let cnf = workspace.getConfiguration("", docUri);
-  if (config) {
-    for (let name of Object.keys(config)) {
-      await cnf.update(name, config[name], ConfigurationTarget.WorkspaceFolder);
-    }
-  }
 
   await cnf.update("editor.autoSurround", "never");
-  await runTest(docUri, replacingResult, selections, expectedReplaceSelections);
-  await cnf.update("editor.autoSurround", "languageDefined");
-  await runTest(
-    docUri,
-    surroundingResult,
-    selections,
-    expectedSurroundSelections,
-  );
-
-  if (config) {
-    for (let name of Object.keys(config)) {
-      await cnf.update(name, undefined, ConfigurationTarget.WorkspaceFolder);
-    }
-  }
+  await runTest(docUri, expectedResult, selections, expectedSelections);
 }
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-// const vscode = require('vscode');
-// const myExtension = require('../extension');
-suite("Expression Insertion Tests", () => {
+async function autosurroundTest(
+  source: string,
+  expectedResult: string,
+  selections: Selection[][],
+  expectedSelections: Selection[][],
+) {
+  let docUri = uri(source);
+  let cnf = workspace.getConfiguration("", docUri);
+
+  await cnf.update("editor.autoSurround", "languageDefined");
+  await runTest(docUri, expectedResult, selections, expectedSelections);
+}
+
+suite("Replacement Tests", () => {
   test("Insertion into simple strings", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.1.js",
       "replacing/result.1.js",
-      "surrounding/result.1.js",
       [
         [new Selection(1, 26, 1, 26)],
         [new Selection(3, 22, 3, 22)],
@@ -194,48 +176,13 @@ suite("Expression Insertion Tests", () => {
         [new Selection(3, 23, 3, 23)],
         [new Selection(5, 26, 5, 26)],
       ],
-      [
-        [new Selection(1, 27, 1, 27)],
-        [new Selection(3, 23, 3, 23)],
-        [new Selection(5, 26, 5, 26)],
-      ],
-    );
-  });
-
-  test("Insertion with multiple selections", async () => {
-    await simpleTest(
-      "test.1.js",
-      "replacing/result.1.js",
-      "surrounding/result.1.js",
-      [
-        [
-          new Selection(1, 26, 1, 26),
-          new Selection(3, 22, 3, 22),
-          new Selection(5, 25, 5, 25),
-        ],
-      ],
-      [
-        [
-          new Selection(1, 27, 1, 27),
-          new Selection(3, 23, 3, 23),
-          new Selection(5, 26, 5, 26),
-        ],
-      ],
-      [
-        [
-          new Selection(1, 27, 1, 27),
-          new Selection(3, 23, 3, 23),
-          new Selection(5, 26, 5, 26),
-        ],
-      ],
     );
   });
 
   test("Selections should be deleted", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.1.js",
       "replacing/result.3.js",
-      "surrounding/result.3.js",
       [
         [
           new Selection(1, 26, 1, 27),
@@ -250,89 +197,67 @@ suite("Expression Insertion Tests", () => {
           new Selection(5, 26, 5, 26),
         ],
       ],
-      [
-        [
-          new Selection(1, 27, 1, 28),
-          new Selection(3, 23, 3, 24),
-          new Selection(5, 26, 5, 27),
-        ],
-      ],
     );
   });
 
   test("Multiline strings", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.4.js",
       "replacing/result.4.js",
-      "surrounding/result.4.js",
       [[new Selection(1, 40, 1, 40)]],
-      [[new Selection(1, 41, 1, 41)]],
       [[new Selection(1, 41, 1, 41)]],
     );
   });
 
   test("Escaped quotes", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.5.js",
       "replacing/result.5.js",
-      "surrounding/result.5.js",
       [[new Selection(0, 17, 0, 17)]],
-      [[new Selection(0, 18, 0, 18)]],
       [[new Selection(0, 18, 0, 18)]],
     );
   });
 
   test("Broken quotes", async () => {
-    // This case seems to be a bug in VS code.
-    await simpleTest(
+    await replacementTest(
       "test.6.js",
       "replacing/result.6.js",
-      "surrounding/result.6.js",
       [[new Selection(4, 36, 4, 36)], [new Selection(6, 9, 6, 9)]],
-      [[new Selection(4, 37, 4, 37)], [new Selection(6, 10, 6, 10)]],
       [[new Selection(4, 37, 4, 37)], [new Selection(6, 10, 6, 10)]],
     );
   });
 
   test("Unended quotes", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.7.js",
       "replacing/result.7.js",
-      "surrounding/result.7.js",
       [[new Selection(0, 17, 0, 17)]],
-      [[new Selection(0, 18, 0, 18)]],
       [[new Selection(0, 18, 0, 18)]],
     );
   });
 
   test("Selection over quote", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.8.js",
       "replacing/result.8.js",
-      "surrounding/result.8.js",
       [[new Selection(0, 37, 0, 44)]],
       [[new Selection(0, 38, 0, 38)]],
-      [[new Selection(0, 38, 0, 45)]],
     );
   });
 
   test("Insert without dollar", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.9.js",
       "replacing/result.9.js",
-      "surrounding/result.9.js",
       [[new Selection(0, 3, 0, 3)], [new Selection(1, 22, 1, 22)]],
-      [[new Selection(0, 4, 0, 4)], [new Selection(1, 23, 1, 23)]],
       [[new Selection(0, 4, 0, 4)], [new Selection(1, 23, 1, 23)]],
     );
   });
 
   test("Ignore comments", async () => {
-    // This case seems to be a bug in VS code.
-    await simpleTest(
+    await replacementTest(
       "test.10.js",
       "replacing/result.10.js",
-      "surrounding/result.10.js",
       [
         [new Selection(0, 39, 0, 39)],
         [new Selection(1, 39, 1, 39)],
@@ -345,43 +270,32 @@ suite("Expression Insertion Tests", () => {
         [new Selection(3, 16, 3, 16)],
         [new Selection(5, 14, 5, 14)],
       ],
-      [
-        [new Selection(0, 40, 0, 40)],
-        [new Selection(1, 40, 1, 40)],
-        [new Selection(3, 16, 3, 16)],
-        [new Selection(5, 14, 5, 14)],
-      ],
     );
   });
 
   test("Replace at end of line", async () => {
     // This case seems to be a bug in VS code.
-    await simpleTest(
+    await replacementTest(
       "test.11.js",
       "replacing/result.11.js",
-      "surrounding/result.11.js",
       [[new Selection(0, 32, 0, 32)]],
-      [[new Selection(0, 33, 0, 33)]],
       [[new Selection(0, 33, 0, 33)]],
     );
   });
 
   test("Replace at end of file", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.12.js",
       "replacing/result.12.js",
-      "surrounding/result.12.js",
       [[new Selection(0, 32, 0, 32)]],
-      [[new Selection(0, 33, 0, 33)]],
       [[new Selection(0, 33, 0, 33)]],
     );
   });
 
   test("Replace multiple in the same line", async () => {
-    await simpleTest(
+    await replacementTest(
       "test.13.js",
       "replacing/result.13.js",
-      "surrounding/result.13.js",
       [
         [
           new Selection(0, 10, 0, 10),
@@ -398,6 +312,156 @@ suite("Expression Insertion Tests", () => {
           new Selection(0, 31, 0, 31),
           new Selection(1, 15, 1, 15),
           new Selection(1, 28, 1, 28),
+        ],
+      ],
+    );
+  });
+});
+
+suite("Autosurround Tests", () => {
+  test("Insertion into simple strings", async () => {
+    await autosurroundTest(
+      "test.1.js",
+      "surrounding/result.1.js",
+      [
+        [new Selection(1, 26, 1, 26)],
+        [new Selection(3, 22, 3, 22)],
+        [new Selection(5, 25, 5, 25)],
+      ],
+      [
+        [new Selection(1, 27, 1, 27)],
+        [new Selection(3, 23, 3, 23)],
+        [new Selection(5, 26, 5, 26)],
+      ],
+    );
+  });
+
+  test("Selections should be deleted", async () => {
+    await autosurroundTest(
+      "test.1.js",
+      "surrounding/result.3.js",
+      [
+        [
+          new Selection(1, 26, 1, 27),
+          new Selection(3, 22, 3, 23),
+          new Selection(5, 25, 5, 26),
+        ],
+      ],
+      [
+        [
+          new Selection(1, 27, 1, 28),
+          new Selection(3, 23, 3, 24),
+          new Selection(5, 26, 5, 27),
+        ],
+      ],
+    );
+  });
+
+  test("Multiline strings", async () => {
+    await autosurroundTest(
+      "test.4.js",
+      "surrounding/result.4.js",
+      [[new Selection(1, 40, 1, 40)]],
+      [[new Selection(1, 41, 1, 41)]],
+    );
+  });
+
+  test("Escaped quotes", async () => {
+    await autosurroundTest(
+      "test.5.js",
+      "surrounding/result.5.js",
+      [[new Selection(0, 17, 0, 17)]],
+      [[new Selection(0, 18, 0, 18)]],
+    );
+  });
+
+  test("Broken quotes", async () => {
+    // This case seems to be a bug in VS code.
+    await autosurroundTest(
+      "test.6.js",
+      "surrounding/result.6.js",
+      [[new Selection(4, 36, 4, 36)], [new Selection(6, 9, 6, 9)]],
+      [[new Selection(4, 37, 4, 37)], [new Selection(6, 10, 6, 10)]],
+    );
+  });
+
+  test("Unended quotes", async () => {
+    await autosurroundTest(
+      "test.7.js",
+      "surrounding/result.7.js",
+      [[new Selection(0, 17, 0, 17)]],
+      [[new Selection(0, 18, 0, 18)]],
+    );
+  });
+
+  test("Selection over quote", async () => {
+    await autosurroundTest(
+      "test.8.js",
+      "surrounding/result.8.js",
+      [[new Selection(0, 37, 0, 44)]],
+      [[new Selection(0, 38, 0, 45)]],
+    );
+  });
+
+  test("Insert without dollar", async () => {
+    await autosurroundTest(
+      "test.9.js",
+      "surrounding/result.9.js",
+      [[new Selection(0, 3, 0, 3)], [new Selection(1, 22, 1, 22)]],
+      [[new Selection(0, 4, 0, 4)], [new Selection(1, 23, 1, 23)]],
+    );
+  });
+
+  test("Ignore comments", async () => {
+    // This case seems to be a bug in VS code.
+    await autosurroundTest(
+      "test.10.js",
+      "surrounding/result.10.js",
+      [
+        [new Selection(0, 39, 0, 39)],
+        [new Selection(1, 39, 1, 39)],
+        [new Selection(3, 15, 3, 15)],
+        [new Selection(5, 13, 5, 13)],
+      ],
+      [
+        [new Selection(0, 40, 0, 40)],
+        [new Selection(1, 40, 1, 40)],
+        [new Selection(3, 16, 3, 16)],
+        [new Selection(5, 14, 5, 14)],
+      ],
+    );
+  });
+
+  test("Replace at end of line", async () => {
+    // This case seems to be a bug in VS code.
+    await autosurroundTest(
+      "test.11.js",
+      "surrounding/result.11.js",
+      [[new Selection(0, 32, 0, 32)]],
+      [[new Selection(0, 33, 0, 33)]],
+    );
+  });
+
+  test("Replace at end of file", async () => {
+    await autosurroundTest(
+      "test.12.js",
+      "surrounding/result.12.js",
+      [[new Selection(0, 32, 0, 32)]],
+      [[new Selection(0, 33, 0, 33)]],
+    );
+  });
+
+  test("Replace multiple in the same line", async () => {
+    await autosurroundTest(
+      "test.13.js",
+      "surrounding/result.13.js",
+      [
+        [
+          new Selection(0, 10, 0, 10),
+          new Selection(0, 19, 0, 19),
+          new Selection(0, 28, 0, 28),
+          new Selection(1, 14, 1, 14),
+          new Selection(1, 26, 1, 26),
         ],
       ],
       [

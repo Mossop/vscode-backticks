@@ -1,6 +1,7 @@
 {
   "name": "backticks",
   "displayName": "Backticks",
+  "publisher": "fractalbrew",
   "description": "Automatically converts quotes to backticks when entering '${'.",
   "version": "1.7.0",
   "license": "BSD-3-Clause",

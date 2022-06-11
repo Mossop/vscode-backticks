@@ -1,1 +1,1 @@
-`Should replace at end of line ${}
+`Should replace at end of line ${

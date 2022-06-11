@@ -1,1 +1,1 @@
-`Should replace at end of file ${}
+`Should replace at end of file ${
