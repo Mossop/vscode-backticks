@@ -81,11 +81,22 @@ function closeEditor(): Promise<void> {
   });
 }
 
-function compareSelection(expected: Selection, received: Selection) {
-  expect(received.active.line).toBe(expected.active.line);
-  expect(received.active.character).toBe(expected.active.character);
-  expect(received.anchor.line).toBe(expected.anchor.line);
-  expect(received.anchor.character).toBe(expected.anchor.character);
+function compareSelection(received: Selection, expected: Selection) {
+  expect(
+    JSON.stringify([
+      received.anchor.line,
+      received.anchor.character,
+      received.active.line,
+      received.active.character,
+    ]),
+  ).toEqual(
+    JSON.stringify([
+      expected.anchor.line,
+      expected.anchor.character,
+      expected.active.line,
+      expected.active.character,
+    ]),
+  );
 }
 
 async function manipulate(
@@ -179,9 +190,18 @@ suite("Replacement Tests", () => {
     );
   });
 
+  test("Brace surrounding", async () => {
+    await replacementTest(
+      "test.2.js",
+      "replacing/result.2.js",
+      [[new Selection(0, 0, 2, 0)]],
+      [[new Selection(0, 1, 0, 1)]],
+    );
+  });
+
   test("Selections should be deleted", async () => {
     await replacementTest(
-      "test.1.js",
+      "test.3.js",
       "replacing/result.3.js",
       [
         [
@@ -338,7 +358,7 @@ suite("Autosurround Tests", () => {
 
   test("Selections should be deleted", async () => {
     await autosurroundTest(
-      "test.1.js",
+      "test.3.js",
       "surrounding/result.3.js",
       [
         [
@@ -354,6 +374,15 @@ suite("Autosurround Tests", () => {
           new Selection(5, 26, 5, 27),
         ],
       ],
+    );
+  });
+
+  test("Brace surrounding", async () => {
+    await replacementTest(
+      "test.2.js",
+      "surrounding/result.2.js",
+      [[new Selection(0, 0, 2, 0)]],
+      [[new Selection(0, 1, 2, 0)]],
     );
   });
 
