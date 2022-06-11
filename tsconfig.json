@@ -1,0 +1,8 @@
+{
+  "extends": "@mossop/config/vscode-ts/tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "include": ["**/*.ts", "**/*.js", "**/.*.js"],
+  "exclude": ["dist", "test_files/**"]
+}

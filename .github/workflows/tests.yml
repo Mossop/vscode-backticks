@@ -23,8 +23,14 @@ jobs:
           node-version: 16
           cache: npm
 
+      - name: Install yarn
+        run: npm install -g yarn
+
       - name: Install
-        run: npm install
+        run: yarn install
 
       - name: Lint
-        run: npm test
+        run: yarn lint
+
+      - name: Test
+        run: yarn test

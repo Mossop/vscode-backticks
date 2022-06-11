@@ -1,20 +1,33 @@
-const { Position } = require('vscode');
+import { Position, TextDocument } from "vscode";
 
-const STATE_NORMAL = 0;
-const STATE_TEMPLATE_QUOTE = 1;
-const STATE_DOUBLE_QUOTE = 2;
-const STATE_SINGLE_QUOTE = 3;
-const STATE_ESCAPE = 4;
-const STATE_COMMENT_START = 5;
-const STATE_COMMENT_SINGLELINE = 6;
-const STATE_COMMENT_MULTILINE = 7;
-const STATE_COMMENT_MULTILINE_END = 8;
+const QUOTES = ["`", '"', "'"];
 
-const QUOTES = ['`', '"', '\''];
+enum State {
+  Normal,
+  TemplateQuote,
+  DoubleQuote,
+  SingleQuote,
+  Escape,
+  CommentStart,
+  CommentSingleLine,
+  CommentMultiLine,
+  CommentMultiLineEnd,
+}
+
+interface QuotePosition {
+  character: string | null;
+  position: Position | null;
+}
 
 class QuoteState {
-  constructor(quoteChar = null) {
-    this.states = [STATE_NORMAL];
+  private states: State[];
+
+  public lastQuotePosition: Position | null;
+
+  public lastQuoteChar: string | null;
+
+  constructor(quoteChar: string | null = null) {
+    this.states = [State.Normal];
     if (quoteChar) {
       this.pushState(QUOTES.indexOf(quoteChar) + 1);
     }
@@ -22,7 +35,7 @@ class QuoteState {
     this.lastQuoteChar = quoteChar;
   }
 
-  pushState(state) {
+  pushState(state: State) {
     this.states.push(state);
   }
 
@@ -30,21 +43,22 @@ class QuoteState {
     this.states.pop();
   }
 
-  get state() {
+  get state(): State | undefined {
     return this.states[this.states.length - 1];
   }
 
-  pushChar(position, char) {
+  pushChar(position: Position, char: string) {
     switch (this.state) {
-      case STATE_COMMENT_START:
+      case State.CommentStart:
         // Regardless we're no longer in the start state.
         this.popState();
 
-        if (char == '/') {
-          this.pushState(STATE_COMMENT_SINGLELINE);
+        if (char == "/") {
+          this.pushState(State.CommentSingleLine);
           return;
-        } else if (char == '*') {
-          this.pushState(STATE_COMMENT_MULTILINE);
+        }
+        if (char == "*") {
+          this.pushState(State.CommentMultiLine);
           return;
         }
 
@@ -53,46 +67,46 @@ class QuoteState {
         break;
 
       // Nothing can change this state.
-      case STATE_COMMENT_SINGLELINE:
+      case State.CommentSingleLine:
         return;
 
       // The only way to change this state is by ending the comment.
-      case STATE_COMMENT_MULTILINE:
-        if (char == '*') {
-          this.pushState(STATE_COMMENT_MULTILINE_END);
+      case State.CommentMultiLine:
+        if (char == "*") {
+          this.pushState(State.CommentMultiLineEnd);
         }
         return;
 
       // We always at least drop back to the comment state, maybe leave that entirely.
-      case STATE_COMMENT_MULTILINE_END:
+      case State.CommentMultiLineEnd:
         this.popState();
-        if (char == '/') {
+        if (char == "/") {
           this.popState();
         }
         return;
 
       // Throw away escaped characters.
-      case STATE_ESCAPE:
+      case State.Escape:
         this.popState();
         return;
     }
 
-    if (this.state == STATE_NORMAL && char == '/') {
-      this.pushState(STATE_COMMENT_START);
+    if (this.state == State.Normal && char == "/") {
+      this.pushState(State.CommentStart);
       return;
     }
 
     // Start of an escaped character
-    if (char == '\\') {
-      this.pushState(STATE_ESCAPE);
+    if (char == "\\") {
+      this.pushState(State.Escape);
       return;
     }
 
     // We now only need do something if this is a quote character.
     let type = QUOTES.indexOf(char) + 1;
-    if (type > STATE_NORMAL) {
+    if (type > State.Normal) {
       // Check if we're entering a quote.
-      if (this.state == STATE_NORMAL) {
+      if (this.state == State.Normal) {
         this.pushState(type);
         this.lastQuotePosition = position;
         this.lastQuoteChar = char;
@@ -113,25 +127,27 @@ class QuoteState {
   pushEOL() {
     switch (this.state) {
       // These states survive an EOL.
-      case STATE_NORMAL:
-      case STATE_TEMPLATE_QUOTE:
-      case STATE_COMMENT_MULTILINE:
+      case State.Normal:
+      case State.TemplateQuote:
+      case State.CommentMultiLine:
         return;
 
       // These pop us up one state.
-      case STATE_DOUBLE_QUOTE:
-      case STATE_SINGLE_QUOTE:
-      case STATE_ESCAPE:
-      case STATE_COMMENT_START:
-      case STATE_COMMENT_SINGLELINE:
-      case STATE_COMMENT_MULTILINE_END:
+      case State.DoubleQuote:
+      case State.SingleQuote:
+      case State.Escape:
+      case State.CommentStart:
+      case State.CommentSingleLine:
+      case State.CommentMultiLineEnd:
         this.popState();
-        return;
     }
   }
 }
 
-exports.findPreviousQuote = function(document, position) {
+export function findPreviousQuote(
+  document: TextDocument,
+  position: Position,
+): QuotePosition {
   let state = new QuoteState();
 
   let line = 0;
@@ -140,7 +156,7 @@ exports.findPreviousQuote = function(document, position) {
       state.pushEOL();
     }
 
-    let text = document.lineAt(line).text;
+    let { text } = document.lineAt(line);
     let char = 0;
     while (char < text.length) {
       let pos = new Position(line, char);
@@ -166,12 +182,16 @@ exports.findPreviousQuote = function(document, position) {
   };
 }
 
-exports.findEndQuote = function(document, position, lastQuoteChar) {
+export function findEndQuote(
+  document: TextDocument,
+  position: Position,
+  lastQuoteChar: string | null,
+): Position | null {
   let state = new QuoteState(lastQuoteChar);
 
-  let line = position.line;
+  let { line } = position;
   while (line < document.lineCount) {
-    let text = document.lineAt(line).text;
+    let { text } = document.lineAt(line);
 
     let char = line == position.line ? position.character : 0;
     while (char < text.length) {
@@ -179,7 +199,7 @@ exports.findEndQuote = function(document, position, lastQuoteChar) {
       state.pushChar(pos, text.charAt(char));
 
       // If this character was the end of the quote then return its position.
-      if (state.state == STATE_NORMAL) {
+      if (state.state == State.Normal) {
         return pos;
       }
 
@@ -189,7 +209,7 @@ exports.findEndQuote = function(document, position, lastQuoteChar) {
     state.pushEOL();
 
     // If the EOL killed the quote then there is no quote character to replace.
-    if (state.state == STATE_NORMAL) {
+    if (state.state == State.Normal) {
       return null;
     }
 

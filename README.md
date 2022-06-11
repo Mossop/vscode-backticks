@@ -1,4 +1,5 @@
 # Backticks
+
 [![Build](https://github.com/Mossop/vscode-backticks/actions/workflows/tests.yml/badge.svg)](https://github.com/Mossop/vscode-backticks/actions/workflows/tests.yml)
 
 This is a simple extension that is useful to JavaScript programmers who, like

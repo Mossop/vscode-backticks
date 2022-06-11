@@ -1,0 +1,8 @@
+{
+  "extends": "@mossop/config/vscode-ts/tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["test_files/**"]
+}
