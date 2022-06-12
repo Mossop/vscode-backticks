@@ -1,0 +1,31 @@
+let tring = null;
+let foo = "Double quoted $tring}"
+
+foo = 'Single quoted $tring}'
+
+foo = `Template literal $tring}`
+
+console.log(foo);
+console.log(tring);
+
+// -----------------------------------------------------------------------------
+let tring = null;
+let foo = "Double quoted ${ring}"
+
+foo = 'Single quoted ${ring}'
+
+foo = `Template literal ${ring}`
+
+console.log(foo);
+console.log(tring);
+
+// -----------------------------------------------------------------------------
+let tring = null;
+let foo = "Double quoted ${t}ring}"
+
+foo = 'Single quoted ${t}ring}'
+
+foo = `Template literal ${t}ring}`
+
+console.log(foo);
+console.log(tring);

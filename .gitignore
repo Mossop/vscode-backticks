@@ -3,3 +3,4 @@ dist/
 .vscode-test/
 *.vsix
 test_files/.vscode/
+test_files/*.js
