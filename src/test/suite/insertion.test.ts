@@ -10,6 +10,7 @@ import {
   Uri,
   Disposable,
   TextEditor,
+  TextDocumentChangeEvent,
 } from "vscode";
 
 const SEPARATOR =
@@ -61,9 +62,12 @@ function awaitComplete(): Promise<void> {
       resolve();
     };
 
-    listener = commands.registerTextEditorCommand(
-      "backticks.test.complete",
-      finished,
+    listener = workspace.onDidChangeTextDocument(
+      (ev: TextDocumentChangeEvent) => {
+        if (ev.contentChanges.some((ch) => ch.text.startsWith("{"))) {
+          finished();
+        }
+      },
     );
   });
 }
