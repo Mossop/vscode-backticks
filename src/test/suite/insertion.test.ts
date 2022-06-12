@@ -173,13 +173,11 @@ interface TestSpec {
   surroundedSelections: Selection[][];
 }
 
-function replacementTest(spec: TestSpec) {
+function replacementTest(spec: TestSpec, parts: TestFileParts) {
   test("autoSurround disabled", async () => {
-    let { original, replacementResult } = parseTestFile(spec.file);
-
     await runTest(
-      original,
-      replacementResult,
+      parts.original,
+      parts.replacementResult,
       spec.selections,
       spec.replacedSelections!,
       { "editor.autoSurround": "never" },
@@ -187,13 +185,11 @@ function replacementTest(spec: TestSpec) {
   });
 }
 
-function autosurroundTest(spec: TestSpec) {
+function autosurroundTest(spec: TestSpec, parts: TestFileParts) {
   test("autoSurround enabled", async () => {
-    let { original, surroundingResult } = parseTestFile(spec.file);
-
     await runTest(
-      original,
-      surroundingResult,
+      parts.original,
+      parts.surroundingResult,
       spec.selections,
       spec.surroundedSelections!,
       { "editor.autoSurround": "languageDefined" },
@@ -299,28 +295,28 @@ const TEST_SPECS: TestSpec[] = [
     surroundedSelections: [[s(0, 4, 0, 4)], [s(1, 23, 1, 23)]],
   },
 
-  {
-    name: "Ignore comments",
-    file: "test.10.txt",
-    selections: [
-      [s(0, 39, 0, 39)],
-      [s(1, 39, 1, 39)],
-      [s(3, 15, 3, 15)],
-      [s(5, 13, 5, 13)],
-    ],
-    replacedSelections: [
-      [s(0, 40, 0, 40)],
-      [s(1, 40, 1, 40)],
-      [s(3, 16, 3, 16)],
-      [s(5, 14, 5, 14)],
-    ],
-    surroundedSelections: [
-      [s(0, 40, 0, 40)],
-      [s(1, 40, 1, 40)],
-      [s(3, 16, 3, 16)],
-      [s(5, 14, 5, 14)],
-    ],
-  },
+  // {
+  //   name: "Ignore comments",
+  //   file: "test.10.txt",
+  //   selections: [
+  //     [s(0, 39, 0, 39)],
+  //     [s(1, 39, 1, 39)],
+  //     [s(3, 15, 3, 15)],
+  //     [s(5, 13, 5, 13)],
+  //   ],
+  //   replacedSelections: [
+  //     [s(0, 40, 0, 40)],
+  //     [s(1, 40, 1, 40)],
+  //     [s(3, 16, 3, 16)],
+  //     [s(5, 14, 5, 14)],
+  //   ],
+  //   surroundedSelections: [
+  //     [s(0, 40, 0, 40)],
+  //     [s(1, 40, 1, 40)],
+  //     [s(3, 16, 3, 16)],
+  //     [s(5, 14, 5, 14)],
+  //   ],
+  // },
 
   {
     name: "Replace at end of line",
@@ -373,7 +369,9 @@ const TEST_SPECS: TestSpec[] = [
 
 TEST_SPECS.forEach((spec: TestSpec) => {
   suite(spec.name, () => {
-    replacementTest(spec);
-    autosurroundTest(spec);
+    let parts = parseTestFile(spec.file);
+
+    replacementTest(spec, parts);
+    autosurroundTest(spec, parts);
   });
 });
