@@ -1,6 +1,8 @@
 {
   "extends": "@mossop/config/vscode-ts/tsconfig.build.json",
   "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
     "outDir": "dist"
   },
   "include": ["src/**/*.ts"],

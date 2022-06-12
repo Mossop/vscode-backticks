@@ -3,12 +3,11 @@
 .vscode-test
 test_files
 src/test
-out
 .gitignore
 tsconfig.build.json
 tsconfig.test.json
 tsconfig.json
-vsc-extension-quickstart.md
 .eslintrc.js
 .prettierrc.js
 .prettierignore
+dist/tsconfig.build.tsbuildinfo
