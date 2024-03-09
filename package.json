@@ -26,6 +26,21 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Backticks",
+      "properties": {
+        "backticks.useBraces": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use braces for the replacement. If false, uses backticks only."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[backticks]": {
+        "backticks.useBraces": false
+      }
+    },
     "commands": [
       {
         "command": "backticks.convertQuotes",

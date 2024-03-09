@@ -53,11 +53,11 @@ class QuoteState {
         // Regardless we're no longer in the start state.
         this.popState();
 
-        if (char == "/") {
+        if (char === "/") {
           this.pushState(State.CommentSingleLine);
           return;
         }
-        if (char == "*") {
+        if (char === "*") {
           this.pushState(State.CommentMultiLine);
           return;
         }
@@ -72,7 +72,7 @@ class QuoteState {
 
       // The only way to change this state is by ending the comment.
       case State.CommentMultiLine:
-        if (char == "*") {
+        if (char === "*") {
           this.pushState(State.CommentMultiLineEnd);
         }
         return;
@@ -80,7 +80,7 @@ class QuoteState {
       // We always at least drop back to the comment state, maybe leave that entirely.
       case State.CommentMultiLineEnd:
         this.popState();
-        if (char == "/") {
+        if (char === "/") {
           this.popState();
         }
         return;
@@ -91,13 +91,13 @@ class QuoteState {
         return;
     }
 
-    if (this.state == State.Normal && char == "/") {
+    if (this.state === State.Normal && char === "/") {
       this.pushState(State.CommentStart);
       return;
     }
 
     // Start of an escaped character
-    if (char == "\\") {
+    if (char === "\\") {
       this.pushState(State.Escape);
       return;
     }
@@ -106,7 +106,7 @@ class QuoteState {
     let type = QUOTES.indexOf(char) + 1;
     if (type > State.Normal) {
       // Check if we're entering a quote.
-      if (this.state == State.Normal) {
+      if (this.state === State.Normal) {
         this.pushState(type);
         this.lastQuotePosition = position;
         this.lastQuoteChar = char;
@@ -114,7 +114,7 @@ class QuoteState {
       }
 
       // Check if we're leaving a quote.
-      if (char == this.lastQuoteChar) {
+      if (char === this.lastQuoteChar) {
         this.popState();
         this.lastQuoteChar = null;
         this.lastQuotePosition = null;
@@ -193,13 +193,13 @@ export function findEndQuote(
   while (line < document.lineCount) {
     let { text } = document.lineAt(line);
 
-    let char = line == position.line ? position.character : 0;
+    let char = line === position.line ? position.character : 0;
     while (char < text.length) {
       let pos = new Position(line, char);
       state.pushChar(pos, text.charAt(char));
 
       // If this character was the end of the quote then return its position.
-      if (state.state == State.Normal) {
+      if (state.state === State.Normal) {
         return pos;
       }
 
@@ -209,7 +209,7 @@ export function findEndQuote(
     state.pushEOL();
 
     // If the EOL killed the quote then there is no quote character to replace.
-    if (state.state == State.Normal) {
+    if (state.state === State.Normal) {
       return null;
     }
 

@@ -1,12 +1,13 @@
 import {
-  Range,
-  commands,
   ExtensionContext,
+  Position,
+  Range,
   TextEditor,
   TextEditorEdit,
-  Position,
+  commands,
+  workspace,
 } from "vscode";
-import { findPreviousQuote, findEndQuote } from "./quotefinder";
+import { findEndQuote, findPreviousQuote } from "./quotefinder";
 
 interface QuoteRange {
   character: string;
@@ -45,29 +46,42 @@ function convertQuotes(
   let { document } = editor;
   let { character, position } = findPreviousQuote(document, atPosition);
 
-  // If we're already in a template string then there is nothing to do.
-  if (character == "`") {
+  // If we're already inside a template literal, do nothing
+  if (character === "`") {
     return;
   }
 
   if (position) {
-    edit.replace(new Range(position, position.translate(0, 1)), "`");
+    const config = workspace.getConfiguration("backticks");
+    const useBraces = config.get<boolean>("useBraces") || false;
+
+    // Replace the start quote with the chosen quoting style
+    if (useBraces) {
+      edit.replace(new Range(position, position.translate(0, 1)), "{`");
+    } else {
+      edit.replace(new Range(position, position.translate(0, 1)), "`");
+    }
 
     let endQuote = findEndQuote(document, atPosition, character);
     if (endQuote) {
-      edit.replace(new Range(endQuote, endQuote.translate(0, 1)), "`");
+      // Replace the end quote with the chosen quoting style
+      if (useBraces) {
+        edit.replace(new Range(endQuote, endQuote.translate(0, 1)), "`}");
+      } else {
+        edit.replace(new Range(endQuote, endQuote.translate(0, 1)), "`");
+      }
     }
   }
 }
 
 function followsDollar(editor: TextEditor, position: Position): boolean {
-  if (position.character == 0) {
+  if (position.character === 0) {
     return false;
   }
 
   let range = new Range(position.translate(0, -1), position);
   let character = editor.document.getText(range);
-  return character == "$";
+  return character === "$";
 }
 
 interface KeyCommandArg {
@@ -91,10 +105,20 @@ async function bracePressed(editor: TextEditor): Promise<void> {
   }
 
   await editor.edit((edit: TextEditorEdit) => {
+    const config = workspace.getConfiguration("backticks");
+    const useBraces = config.get<boolean>("useBraces") || false;
+
     for (let range of ranges) {
-      edit.replace(new Range(range.start, range.start.translate(0, 1)), "`");
-      if (range.end) {
-        edit.replace(new Range(range.end, range.end.translate(0, 1)), "`");
+      if (useBraces) {
+        edit.replace(new Range(range.start, range.start.translate(0, 1)), "{`");
+        if (range.end) {
+          edit.replace(new Range(range.end, range.end.translate(0, 1)), "`}");
+        }
+      } else {
+        edit.replace(new Range(range.start, range.start.translate(0, 1)), "`");
+        if (range.end) {
+          edit.replace(new Range(range.end, range.end.translate(0, 1)), "`");
+        }
       }
     }
   });
