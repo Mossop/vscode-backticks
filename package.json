@@ -30,15 +30,21 @@
       "title": "Backticks",
       "properties": {
         "backticks.useBraces": {
-          "type": "boolean",
-          "default": false,
-          "description": "Use braces for the replacement. If false, uses backticks only."
+          "type": "array",
+          "default": [
+            ".tsx",
+            ".jsx"
+          ],
+          "description": "Files where to use braces for the replacement."
         }
       }
     },
     "configurationDefaults": {
       "[backticks]": {
-        "backticks.useBraces": false
+        "backticks.useBraces": [
+          ".tsx",
+          ".jsx"
+        ]
       }
     },
     "commands": [
