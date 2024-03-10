@@ -26,6 +26,27 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Backticks",
+      "properties": {
+        "backticks.useBraces": {
+          "type": "array",
+          "default": [
+            ".tsx",
+            ".jsx"
+          ],
+          "description": "Files where to use braces for the replacement."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[backticks]": {
+        "backticks.useBraces": [
+          ".tsx",
+          ".jsx"
+        ]
+      }
+    },
     "commands": [
       {
         "command": "backticks.convertQuotes",
