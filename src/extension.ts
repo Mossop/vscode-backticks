@@ -6,6 +6,7 @@ import {
   TextEditorEdit,
   Position,
 } from "vscode";
+
 import { findPreviousQuote, findEndQuote } from "./quotefinder";
 
 interface QuoteRange {

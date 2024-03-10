@@ -1,7 +1,7 @@
-import expect from "expect";
 import fs from "fs";
 import path from "path";
 
+import expect from "expect";
 import {
   window,
   workspace,
