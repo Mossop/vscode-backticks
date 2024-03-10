@@ -1,13 +1,13 @@
 import {
-  Range,
-  commands,
   ExtensionContext,
+  Position,
+  Range,
   TextEditor,
   TextEditorEdit,
-  Position,
+  commands,
+  workspace,
 } from "vscode";
-
-import { findPreviousQuote, findEndQuote } from "./quotefinder";
+import { findEndQuote, findPreviousQuote } from "./quotefinder";
 
 interface QuoteRange {
   character: string;
@@ -52,11 +52,27 @@ function convertQuotes(
   }
 
   if (position) {
-    edit.replace(new Range(position, position.translate(0, 1)), "`");
+    const config = workspace.getConfiguration("backticks");
+    const allowedFileExtensions = config.get<string[]>("useBraces") || [];
+    const currentFileExtension = document.fileName.substring(
+      document.fileName.lastIndexOf("."),
+    );
+
+    if (allowedFileExtensions.includes(currentFileExtension)) {
+      // Replace the start quote with the chosen quoting style
+      edit.replace(new Range(position, position.translate(0, 1)), "{`");
+    } else {
+      edit.replace(new Range(position, position.translate(0, 1)), "`");
+    }
 
     let endQuote = findEndQuote(document, atPosition, character);
     if (endQuote) {
-      edit.replace(new Range(endQuote, endQuote.translate(0, 1)), "`");
+      // Replace the end quote with the chosen quoting style
+      if (!allowedFileExtensions.includes(currentFileExtension)) {
+        edit.replace(new Range(endQuote, endQuote.translate(0, 1)), "`}");
+      } else {
+        edit.replace(new Range(endQuote, endQuote.translate(0, 1)), "`");
+      }
     }
   }
 }
@@ -77,6 +93,7 @@ interface KeyCommandArg {
 
 async function bracePressed(editor: TextEditor): Promise<void> {
   let ranges: QuoteRange[] = [];
+  let { document } = editor;
 
   for (let selection of editor.selections) {
     if (!selection.isEmpty || !followsDollar(editor, selection.active)) {
@@ -92,10 +109,23 @@ async function bracePressed(editor: TextEditor): Promise<void> {
   }
 
   await editor.edit((edit: TextEditorEdit) => {
+    const config = workspace.getConfiguration("backticks");
+    const allowedFileExtensions = config.get<string[]>("useBraces") || [];
+    const currentFileExtension = document.fileName.substring(
+      document.fileName.lastIndexOf("."),
+    );
+
     for (let range of ranges) {
-      edit.replace(new Range(range.start, range.start.translate(0, 1)), "`");
-      if (range.end) {
-        edit.replace(new Range(range.end, range.end.translate(0, 1)), "`");
+      if (allowedFileExtensions.includes(currentFileExtension)) {
+        edit.replace(new Range(range.start, range.start.translate(0, 1)), "{`");
+        if (range.end) {
+          edit.replace(new Range(range.end, range.end.translate(0, 1)), "`}");
+        }
+      } else {
+        edit.replace(new Range(range.start, range.start.translate(0, 1)), "`");
+        if (range.end) {
+          edit.replace(new Range(range.end, range.end.translate(0, 1)), "`");
+        }
       }
     }
   });
